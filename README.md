@@ -22,4 +22,4 @@ flagged_networks.csv/.pkl: csv/pandas pickle file with all features of networks 
 
 3- Enjoy your new prediction and compare with the old ones in the prediction_set_with_class!
 
-4- Want to try your own classifier? Change the number of ensemble, the balancing techniques used, the size of the forest and run again! If you want to study OOB prediction and the accuraty of the classifier, create an 'OOBpred' folder and a 'MA' folder and to save the results of the OOB prediction and accuracy of the model. From the OOB prediction files you can compute precision, recall and other parts of the confusion matrix by using a hard vote majority to predict the class of samples.
+4- Want to try your own classifier? Change the number of ensemble, the balancing techniques used, the size of the forest and run again! If you want to study OOB prediction and the accuracy of the classifier, create an 'OOBpred' folder and a 'MA' folder and to save the results of the OOB prediction and accuracy of the model. From the OOB prediction files you can compute precision, recall and other parts of the confusion matrix by using a hard vote majority to predict the class of samples.
