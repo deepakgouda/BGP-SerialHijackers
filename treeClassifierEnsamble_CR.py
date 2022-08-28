@@ -1,7 +1,6 @@
 from sklearn.datasets import make_classification
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.base import clone
-import imblearn
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import TomekLinks
@@ -43,8 +42,8 @@ def dropcol_importances(rf, X_train, y_train):
 
 def main():
 	# Files (assuming all files in a folder named ML)
-	gt_file = "ML/groundtruth_dataset.pkl"
-	pred_set = "ML/prediction_set_with_class.pkl"
+	gt_file = "groundtruth_dataset.pkl"
+	pred_set = "prediction_set_with_class.pkl"
 
 	# IPv
 	ipv = "v4"
@@ -53,10 +52,10 @@ def main():
 	data = pd.read_pickle(gt_file)
 	data_predict = pd.read_pickle(pred_set)
 	# Checking file are correct
-	print "Ground Truth data"
-	print data.shape
-	print "Prediction set"
-	print data_predict.shape
+	print("Ground Truth data")
+	print(data.shape)
+	print("Prediction set")
+	print(data_predict.shape)
 	cols = data.columns
 	data[cols] = data[cols].apply(pd.to_numeric, errors="coerce")
 	# print data_predict.columns # To check all columns of prediction dataset.
@@ -72,22 +71,22 @@ def main():
 
 	# Feature selection
 	features = list(data.columns)
-	print "Features: %d" % (len(features))
-	print features
+	print("Features: %d" % (len(features)))
+	print(features)
 
 	# Getting ASN class
-	print data.head()
-	print "Ground truth shape :"
-	print data["class"].value_counts()
+	print(data.head())
+	print("Ground truth shape :")
+	print(data["class"].value_counts())
 	X_train, y_train = data.drop("class", axis=1), data["class"]
 
 	# Sampling method for balancing (not all are used, meta-structure left for further trials)
-	rus = RandomUnderSampler(return_indices=False)
+	rus = RandomUnderSampler()
 	ros = RandomOverSampler()
-	smote = SMOTE(ratio="minority")
-	smt = SMOTETomek(ratio="auto")
-	tl = TomekLinks(return_indices=False, ratio="majority")
-	cc_models = [ClusterCentroids(ratio={0: x}) for x in range(15, 30, 1)]
+	smote = SMOTE(sampling_strategy="minority")
+	smt = SMOTETomek(sampling_strategy="auto")
+	tl = TomekLinks(sampling_strategy="majority")
+	cc_models = [ClusterCentroids(sampling_strategy={0: x}) for x in range(15, 30, 1)]
 	SMs = [
 		rus,
 		ros,
@@ -98,7 +97,6 @@ def main():
 	without_asn = [2, 3]
 
 	model_accuracy = []
-	oob_decisions = []
 	estimators_list = []
 	forest_count = 0
 	forest_size = 500  # Picking forest size
@@ -118,12 +116,12 @@ def main():
 
 			# Balanced dataset
 			data_balanced = pd.DataFrame(
-				{X_train.columns[k]: X_sm[:, k] for k in range(len(X_train.columns))}
+				{X_train.columns[k]: X_sm[X_sm.columns[k]] for k in range(len(X_train.columns))}
 			)
 			data_balanced.loc[:, "class"] = y_sm.tolist()
 			if r == 0:
-				print "Balanced dataset shape :"
-				print data_balanced["class"].value_counts()
+				print("Balanced dataset shape :")
+				print(data_balanced["class"].value_counts())
 			# print data_balanced.head()
 			if i in without_asn:
 				X, y = data_balanced.drop("class", axis=1), data_balanced["class"]
@@ -138,10 +136,13 @@ def main():
 				n_estimators=forest_size, bootstrap=True, oob_score=True
 			)
 			forest.fit(X, y)
-			print "Sampling method %d, Forest index %d, Model accuracy using OOB %f" % (
-				i,
-				forest_count,
-				forest.oob_score_,
+			print(
+				"Sampling method %d, Forest index %d, Model accuracy using OOB %f"
+				% (
+					i,
+					forest_count,
+					forest.oob_score_,
+				)
 			)
 			model_accuracy.append(forest.oob_score_)
 
@@ -184,8 +185,8 @@ def main():
 
 	# Adding Predictions
 	data_predict.loc[:, "HardVotePred"] = hard_vote_pred
-	print "Hard Vote"
-	print data_predict["HardVotePred"].value_counts()
+	print("Hard Vote")
+	print(data_predict["HardVotePred"].value_counts())
 
 	# Output to file
 	outfile = "ML/predictions_%df_%dt_%de" % (
